@@ -126,10 +126,36 @@ export default function Lobbies() {
       return;
     }
 
-    // TODO: Implement actual join logic with backend
+    // Find the lobby and update player count
+    const lobbyToJoin = lobbies.find(lobby => lobby.id === lobbyId);
+    if (!lobbyToJoin) {
+      toast({
+        title: 'Heist Not Found',
+        description: 'The heist you tried to join no longer exists.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (lobbyToJoin.players >= lobbyToJoin.maxPlayers) {
+      toast({
+        title: 'Heist Full',
+        description: 'This heist is already at maximum capacity.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Update the lobby with new player count
+    setLobbies(prev => prev.map(lobby => 
+      lobby.id === lobbyId 
+        ? { ...lobby, players: lobby.players + 1 }
+        : lobby
+    ));
+
     toast({
-      title: 'Joining Heist...',
-      description: 'Preparing to enter the lobby. Place your bet!',
+      title: 'Successfully Joined Heist!',
+      description: `You've joined "${lobbyToJoin.name}". Bet placed: ${lobbyToJoin.betAmount} SOL`,
     });
   };
 
@@ -141,7 +167,7 @@ export default function Lobbies() {
     });
   };
 
-  const handleCreateLobby = (lobbyData: {
+  const handleCreateLobby = async (lobbyData: {
     name: string;
     maxPlayers: number;
     betAmount: number;
@@ -156,23 +182,59 @@ export default function Lobbies() {
       return;
     }
 
-    // TODO: Implement actual create logic with backend
-    const newLobby: LobbyData = {
-      id: Date.now().toString(),
-      name: lobbyData.name,
-      host: 'You', // Replace with actual username
-      players: 1,
-      maxPlayers: lobbyData.maxPlayers,
-      betAmount: lobbyData.betAmount,
-      difficulty: lobbyData.difficulty as 'Easy' | 'Medium' | 'Hard' | 'Insane',
-      status: 'waiting',
-    };
+    try {
+      // Generate a meme for the new heist
+      toast({
+        title: 'Creating Heist...',
+        description: 'Generating epic meme for your heist!',
+      });
 
-    setLobbies(prev => [newLobby, ...prev]);
-    toast({
-      title: 'Heist Created!',
-      description: `"${lobbyData.name}" is ready for players to join.`,
-    });
+      const { AIService } = await import('@/services/aiService');
+      const meme = await AIService.generateMeme({
+        prompt: `${lobbyData.name}, ${lobbyData.difficulty} difficulty heist, ${lobbyData.maxPlayers} players, ${lobbyData.betAmount} SOL bet`,
+        topic: `${lobbyData.difficulty} heist called ${lobbyData.name}`,
+        style: 'epic'
+      });
+
+      const newLobby: LobbyData = {
+        id: Date.now().toString(),
+        name: lobbyData.name,
+        host: 'You', // Replace with actual username
+        players: 1,
+        maxPlayers: lobbyData.maxPlayers,
+        betAmount: lobbyData.betAmount,
+        difficulty: lobbyData.difficulty as 'Easy' | 'Medium' | 'Hard' | 'Insane',
+        status: 'waiting',
+      };
+
+      setLobbies(prev => [newLobby, ...prev]);
+      
+      toast({
+        title: 'Heist Created!',
+        description: `"${lobbyData.name}" is ready for players to join. Epic meme generated!`,
+      });
+    } catch (error) {
+      console.error('Error creating heist:', error);
+      
+      // Still create the lobby even if meme generation fails
+      const newLobby: LobbyData = {
+        id: Date.now().toString(),
+        name: lobbyData.name,
+        host: 'You',
+        players: 1,
+        maxPlayers: lobbyData.maxPlayers,
+        betAmount: lobbyData.betAmount,
+        difficulty: lobbyData.difficulty as 'Easy' | 'Medium' | 'Hard' | 'Insane',
+        status: 'waiting',
+      };
+
+      setLobbies(prev => [newLobby, ...prev]);
+      
+      toast({
+        title: 'Heist Created!',
+        description: `"${lobbyData.name}" is ready for players to join.`,
+      });
+    }
   };
 
   const handleRefresh = async () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -111,6 +111,47 @@ export default function NFTGallery() {
   const [selectedRarity, setSelectedRarity] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [selectedNFT, setSelectedNFT] = useState<typeof mockNFTs[0] | null>(null);
+  const [loadingMemes, setLoadingMemes] = useState(false);
+  const [generatedMemes, setGeneratedMemes] = useState<Record<number, string>>({});
+
+  // Generate memes for NFTs on component mount
+  useEffect(() => {
+    generateMemesForNFTs();
+  }, []);
+
+  const generateMemesForNFTs = async () => {
+    setLoadingMemes(true);
+    try {
+      const { AIService } = await import('@/services/aiService');
+      const memePromises = mockNFTs.map(async (nft) => {
+        try {
+          const meme = await AIService.generateNFTMeme({
+            name: nft.name,
+            rarity: nft.rarity,
+            attributes: nft.attributes
+          });
+          return { id: nft.id, image: meme.image };
+        } catch (error) {
+          console.error(`Failed to generate meme for NFT ${nft.id}:`, error);
+          return { id: nft.id, image: null };
+        }
+      });
+
+      const results = await Promise.all(memePromises);
+      const memeMap: Record<number, string> = {};
+      results.forEach(result => {
+        if (result.image) {
+          memeMap[result.id] = result.image;
+        }
+      });
+      
+      setGeneratedMemes(memeMap);
+    } catch (error) {
+      console.error('Error generating NFT memes:', error);
+    } finally {
+      setLoadingMemes(false);
+    }
+  };
 
   // Filter and sort NFTs
   const filteredNFTs = nfts
@@ -270,9 +311,21 @@ export default function NFTGallery() {
                   <Card className="p-4 bg-gradient-surface border-card-border hover:shadow-gaming transition-all overflow-hidden">
                     {/* NFT Image */}
                     <div className="relative aspect-square bg-muted rounded-xl mb-4 overflow-hidden">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-16 h-16 text-muted-foreground" />
-                      </div>
+                      {generatedMemes[nft.id] ? (
+                        <img 
+                          src={generatedMemes[nft.id]} 
+                          alt={nft.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : loadingMemes ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        </div>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                        </div>
+                      )}
                       
                       {/* Rarity Glow */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${nft.rarityColor} opacity-20 group-hover:opacity-30 transition-opacity`} />
@@ -356,9 +409,17 @@ export default function NFTGallery() {
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Image */}
                   <div className="relative aspect-square bg-muted rounded-xl overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-24 h-24 text-muted-foreground" />
-                    </div>
+                    {generatedMemes[selectedNFT.id] ? (
+                      <img 
+                        src={generatedMemes[selectedNFT.id]} 
+                        alt={selectedNFT.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ImageIcon className="w-24 h-24 text-muted-foreground" />
+                      </div>
+                    )}
                     <div className={`absolute inset-0 bg-gradient-to-br ${selectedNFT.rarityColor} opacity-20`} />
                   </div>
 

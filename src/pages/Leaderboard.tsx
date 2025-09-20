@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -114,6 +114,45 @@ const getRankColor = (rank: number) => {
 export default function Leaderboard() {
   const [selectedTab, setSelectedTab] = useState('all-time');
   const [selectedCategory, setSelectedCategory] = useState('wins');
+  const [generatedAvatars, setGeneratedAvatars] = useState<Record<string, string>>({});
+  const [loadingAvatars, setLoadingAvatars] = useState(false);
+
+  // Generate profile images for top players
+  useEffect(() => {
+    generateProfileImages();
+  }, []);
+
+  const generateProfileImages = async () => {
+    setLoadingAvatars(true);
+    try {
+      const { AIService } = await import('@/services/aiService');
+      const topPlayers = mockLeaderboard.slice(0, 5); // Generate for top 5
+      
+      const avatarPromises = topPlayers.map(async (player) => {
+        try {
+          const profileImage = await AIService.generateProfileImage(player.username, player.rank);
+          return { username: player.username, image: profileImage.image };
+        } catch (error) {
+          console.error(`Failed to generate avatar for ${player.username}:`, error);
+          return { username: player.username, image: null };
+        }
+      });
+
+      const results = await Promise.all(avatarPromises);
+      const avatarMap: Record<string, string> = {};
+      results.forEach(result => {
+        if (result.image) {
+          avatarMap[result.username] = result.image;
+        }
+      });
+      
+      setGeneratedAvatars(avatarMap);
+    } catch (error) {
+      console.error('Error generating profile images:', error);
+    } finally {
+      setLoadingAvatars(false);
+    }
+  };
 
   const sortedPlayers = [...mockLeaderboard].sort((a, b) => {
     switch (selectedCategory) {
@@ -261,9 +300,13 @@ export default function Leaderboard() {
 
                       {/* Avatar */}
                       <Avatar className="w-16 h-16 mx-auto mb-4 border-4 border-primary/20">
-                        <AvatarImage src={player.avatar} />
+                        <AvatarImage src={generatedAvatars[player.username] || player.avatar} />
                         <AvatarFallback className="bg-gradient-primary text-white font-bold">
-                          {player.username.slice(0, 2).toUpperCase()}
+                          {loadingAvatars ? (
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                          ) : (
+                            player.username.slice(0, 2).toUpperCase()
+                          )}
                         </AvatarFallback>
                       </Avatar>
 
@@ -283,11 +326,11 @@ export default function Leaderboard() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Win Rate:</span>
-                          <span className="font-semibold text-success">{player.winRate}%</span>
+                          <span className="font-semibold text-success">{player.winRate.toFixed(1)}%</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Earned:</span>
-                          <span className="font-semibold text-secondary">{player.totalEarned} SOL</span>
+                          <span className="font-semibold text-secondary">{player.totalEarned.toFixed(2)} SOL</span>
                         </div>
                       </div>
                     </Card>
@@ -321,9 +364,13 @@ export default function Leaderboard() {
 
                         {/* Avatar & Name */}
                         <Avatar className="w-10 h-10 border-2 border-primary/20">
-                          <AvatarImage src={player.avatar} />
+                          <AvatarImage src={generatedAvatars[player.username] || player.avatar} />
                           <AvatarFallback className="bg-gradient-primary text-white text-sm font-bold">
-                            {player.username.slice(0, 2).toUpperCase()}
+                            {loadingAvatars ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            ) : (
+                              player.username.slice(0, 2).toUpperCase()
+                            )}
                           </AvatarFallback>
                         </Avatar>
                         
@@ -340,11 +387,11 @@ export default function Leaderboard() {
                           <div className="text-muted-foreground">Wins</div>
                         </div>
                         <div className="text-center">
-                          <div className="font-semibold text-success">{player.winRate}%</div>
+                          <div className="font-semibold text-success">{player.winRate.toFixed(1)}%</div>
                           <div className="text-muted-foreground">Rate</div>
                         </div>
                         <div className="text-center">
-                          <div className="font-semibold text-secondary">{player.totalEarned}</div>
+                          <div className="font-semibold text-secondary">{player.totalEarned.toFixed(2)}</div>
                           <div className="text-muted-foreground">SOL</div>
                         </div>
                         <div className="text-center">
