@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
-import { motion } from 'framer-motion';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { motion } from "framer-motion";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import {
   User,
   Trophy,
@@ -20,117 +20,119 @@ import {
   Copy,
   Star,
   Shield,
-  Crown
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+  Crown,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 // Mock user data - replace with actual API calls
 const mockUserStats = {
-  username: 'VibeHunter',
-  walletAddress: 'FxYZ...abc123',
+  username: "VibeHunter",
+  walletAddress: "FxYZ...abc123",
   totalHeists: 47,
   heistsWon: 31,
   totalEarned: 12.45,
   nftsMinted: 18,
-  rank: 'Elite Heister',
+  rank: "Elite Heister",
   level: 12,
   xp: 2340,
   xpToNext: 500,
-  joinDate: '2024-03-15',
+  joinDate: "2024-03-15",
   winRate: 65.9,
-  favoriteMode: 'Medium Difficulty',
+  favoriteMode: "Medium Difficulty",
   longestStreak: 8,
 };
 
 const mockRecentGames = [
   {
     id: 1,
-    name: 'Epic Vault Raid',
-    result: 'Won',
+    name: "Epic Vault Raid",
+    result: "Won",
     earned: 1.2,
-    date: '2024-03-20',
-    difficulty: 'Hard',
+    date: "2024-03-20",
+    difficulty: "Hard",
   },
   {
     id: 2,
-    name: 'Meme Factory Heist',
-    result: 'Lost',
+    name: "Meme Factory Heist",
+    result: "Lost",
     earned: -0.5,
-    date: '2024-03-19',
-    difficulty: 'Medium',
+    date: "2024-03-19",
+    difficulty: "Medium",
   },
   {
     id: 3,
-    name: 'Crypto Cave',
-    result: 'Won',
+    name: "Crypto Cave",
+    result: "Won",
     earned: 0.8,
-    date: '2024-03-18',
-    difficulty: 'Easy',
+    date: "2024-03-18",
+    difficulty: "Easy",
   },
 ];
 
 const mockNFTs = [
   {
     id: 1,
-    name: 'Epic Roast #1337',
-    image: '/placeholder.svg',
-    rarity: 'Legendary',
-    mintDate: '2024-03-20',
+    name: "Epic Roast #1337",
+    image: "/placeholder.svg",
+    rarity: "Legendary",
+    mintDate: "2024-03-20",
   },
   {
     id: 2,
-    name: 'Victory Meme #420',
-    image: '/placeholder.svg',
-    rarity: 'Rare',
-    mintDate: '2024-03-19',
+    name: "Victory Meme #420",
+    image: "/placeholder.svg",
+    rarity: "Rare",
+    mintDate: "2024-03-19",
   },
   {
     id: 3,
-    name: 'Heist Master #69',
-    image: '/placeholder.svg',
-    rarity: 'Epic',
-    mintDate: '2024-03-15',
+    name: "Heist Master #69",
+    image: "/placeholder.svg",
+    rarity: "Epic",
+    mintDate: "2024-03-15",
   },
 ];
 
 const achievements = [
-  { 
-    name: 'First Heist', 
-    description: 'Complete your first heist', 
+  {
+    name: "First Heist",
+    description: "Complete your first heist",
     unlocked: true,
-    icon: Target 
+    icon: Target,
   },
-  { 
-    name: 'Meme Master', 
-    description: 'Create 100 memes', 
+  {
+    name: "Meme Master",
+    description: "Create 100 memes",
     unlocked: true,
-    icon: ImageIcon 
+    icon: ImageIcon,
   },
-  { 
-    name: 'Win Streak', 
-    description: 'Win 5 heists in a row', 
+  {
+    name: "Win Streak",
+    description: "Win 5 heists in a row",
     unlocked: true,
-    icon: Star 
+    icon: Star,
   },
-  { 
-    name: 'Big Spender', 
-    description: 'Bet over 10 SOL total', 
+  {
+    name: "Big Spender",
+    description: "Bet over 10 SOL total",
     unlocked: false,
-    icon: Coins 
+    icon: Coins,
   },
 ];
 
 export default function Profile() {
   const { connected, publicKey } = useWallet();
   const { toast } = useToast();
-  const [selectedTab, setSelectedTab] = useState('overview');
+  const [selectedTab, setSelectedTab] = useState("overview");
+  const navigate = useNavigate();
 
   const copyAddress = () => {
     if (publicKey) {
       navigator.clipboard.writeText(publicKey.toString());
       toast({
-        title: 'Address Copied',
-        description: 'Wallet address copied to clipboard',
+        title: "Address Copied",
+        description: "Wallet address copied to clipboard",
       });
     }
   };
@@ -175,7 +177,7 @@ export default function Profile() {
                     VH
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div className="text-center md:text-left">
                   <div className="flex items-center gap-2 mb-2">
                     <h1 className="text-2xl font-bold text-foreground">
@@ -186,26 +188,39 @@ export default function Profile() {
                       Level {mockUserStats.level}
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                    <span className="text-sm">{mockUserStats.walletAddress}</span>
-                    <Button variant="ghost" size="icon-sm" onClick={copyAddress}>
+                    <span className="text-sm">
+                      {mockUserStats.walletAddress}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={copyAddress}
+                    >
                       <Copy className="w-3 h-3" />
                     </Button>
                   </div>
-                  
+
                   <Badge variant="secondary" className="mb-2">
                     <Shield className="w-3 h-3 mr-1" />
                     {mockUserStats.rank}
                   </Badge>
-                  
+
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span>Experience</span>
-                      <span>{mockUserStats.xp}/{mockUserStats.xp + mockUserStats.xpToNext} XP</span>
+                      <span>
+                        {mockUserStats.xp}/
+                        {mockUserStats.xp + mockUserStats.xpToNext} XP
+                      </span>
                     </div>
-                    <Progress 
-                      value={(mockUserStats.xp / (mockUserStats.xp + mockUserStats.xpToNext)) * 100} 
+                    <Progress
+                      value={
+                        (mockUserStats.xp /
+                          (mockUserStats.xp + mockUserStats.xpToNext)) *
+                        100
+                      }
                       className="w-48"
                     />
                   </div>
@@ -215,20 +230,36 @@ export default function Profile() {
               {/* Quick Stats */}
               <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 min-w-0">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{mockUserStats.totalHeists}</div>
-                  <div className="text-xs text-muted-foreground">Total Heists</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {mockUserStats.totalHeists}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Total Heists
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-success">{mockUserStats.heistsWon}</div>
-                  <div className="text-xs text-muted-foreground">Heists Won</div>
+                  <div className="text-2xl font-bold text-success">
+                    {mockUserStats.heistsWon}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Heists Won
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-secondary">{mockUserStats.totalEarned}</div>
-                  <div className="text-xs text-muted-foreground">SOL Earned</div>
+                  <div className="text-2xl font-bold text-secondary">
+                    {mockUserStats.totalEarned}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    SOL Earned
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{mockUserStats.nftsMinted}</div>
-                  <div className="text-xs text-muted-foreground">NFTs Minted</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {mockUserStats.nftsMinted}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    NFTs Minted
+                  </div>
                 </div>
               </div>
             </div>
@@ -236,7 +267,11 @@ export default function Profile() {
         </motion.div>
 
         {/* Profile Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+        <Tabs
+          value={selectedTab}
+          onValueChange={setSelectedTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4 bg-surface">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
@@ -256,19 +291,31 @@ export default function Profile() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Win Rate</span>
-                    <span className="font-semibold text-success">{mockUserStats.winRate}%</span>
+                    <span className="font-semibold text-success">
+                      {mockUserStats.winRate}%
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Longest Win Streak</span>
-                    <span className="font-semibold">{mockUserStats.longestStreak} games</span>
+                    <span className="text-muted-foreground">
+                      Longest Win Streak
+                    </span>
+                    <span className="font-semibold">
+                      {mockUserStats.longestStreak} games
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Favorite Difficulty</span>
-                    <Badge variant="secondary">{mockUserStats.favoriteMode}</Badge>
+                    <span className="text-muted-foreground">
+                      Favorite Difficulty
+                    </span>
+                    <Badge variant="secondary">
+                      {mockUserStats.favoriteMode}
+                    </Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Member Since</span>
-                    <span className="font-semibold">{mockUserStats.joinDate}</span>
+                    <span className="font-semibold">
+                      {mockUserStats.joinDate}
+                    </span>
                   </div>
                 </div>
               </Card>
@@ -284,11 +331,19 @@ export default function Profile() {
                     <Target className="w-4 h-4 mr-2" />
                     Join Random Heist
                   </Button>
-                  <Button variant="neon" className="w-full justify-start">
+                  <Button
+                    onClick={() => navigate("/nft-gallery")}
+                    variant="neon"
+                    className="w-full justify-start"
+                  >
                     <ImageIcon className="w-4 h-4 mr-2" />
                     View NFT Gallery
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    onClick={() => navigate("/leaderboard")}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
                     <Trophy className="w-4 h-4 mr-2" />
                     View Leaderboard
                   </Button>
@@ -318,7 +373,9 @@ export default function Profile() {
                     className="flex items-center justify-between p-4 bg-surface rounded-xl border border-border"
                   >
                     <div>
-                      <div className="font-medium text-foreground">{game.name}</div>
+                      <div className="font-medium text-foreground">
+                        {game.name}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {game.date} • {game.difficulty} Difficulty
                       </div>
@@ -326,17 +383,20 @@ export default function Profile() {
                     <div className="text-right">
                       <Badge
                         className={`mb-1 ${
-                          game.result === 'Won' 
-                            ? 'bg-success text-success-foreground' 
-                            : 'bg-danger text-danger-foreground'
+                          game.result === "Won"
+                            ? "bg-success text-success-foreground"
+                            : "bg-danger text-danger-foreground"
                         }`}
                       >
                         {game.result}
                       </Badge>
-                      <div className={`text-sm font-semibold ${
-                        game.earned > 0 ? 'text-success' : 'text-danger'
-                      }`}>
-                        {game.earned > 0 ? '+' : ''}{game.earned} SOL
+                      <div
+                        className={`text-sm font-semibold ${
+                          game.earned > 0 ? "text-success" : "text-danger"
+                        }`}
+                      >
+                        {game.earned > 0 ? "+" : ""}
+                        {game.earned} SOL
                       </div>
                     </div>
                   </motion.div>
@@ -365,7 +425,9 @@ export default function Profile() {
                       <ImageIcon className="w-12 h-12 text-muted-foreground" />
                     </div>
                     <div className="space-y-2">
-                      <div className="font-medium text-foreground">{nft.name}</div>
+                      <div className="font-medium text-foreground">
+                        {nft.name}
+                      </div>
                       <Badge className="bg-gradient-primary text-white text-xs">
                         {nft.rarity}
                       </Badge>
@@ -397,16 +459,18 @@ export default function Profile() {
                       transition={{ delay: index * 0.1 }}
                       className={`p-4 rounded-xl border transition-all ${
                         achievement.unlocked
-                          ? 'bg-surface border-primary/20 shadow-glow'
-                          : 'bg-muted/50 border-border opacity-60'
+                          ? "bg-surface border-primary/20 shadow-glow"
+                          : "bg-muted/50 border-border opacity-60"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${
-                          achievement.unlocked 
-                            ? 'bg-gradient-primary text-white' 
-                            : 'bg-muted text-muted-foreground'
-                        }`}>
+                        <div
+                          className={`p-2 rounded-lg ${
+                            achievement.unlocked
+                              ? "bg-gradient-primary text-white"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
                           <Icon className="w-5 h-5" />
                         </div>
                         <div>

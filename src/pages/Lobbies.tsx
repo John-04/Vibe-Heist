@@ -1,116 +1,149 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { LobbyCard, type LobbyData } from '@/components/game/LobbyCard';
-import { CreateLobbyModal } from '@/components/game/CreateLobbyModal';
-import { FilterBar, type FilterOptions } from '@/components/game/FilterBar';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { Plus, Zap, Users, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { LobbyCard, type LobbyData } from "@/components/game/LobbyCard";
+import { CreateLobbyModal } from "@/components/game/CreateLobbyModal";
+import { FilterBar, type FilterOptions } from "@/components/game/FilterBar";
+import { motion, AnimatePresence } from "framer-motion";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { Plus, Zap, Users, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data - replace with actual API calls
 const mockLobbies: LobbyData[] = [
   {
-    id: '1',
-    name: 'Epic Meme Vault Raid',
-    host: 'CyberNinja42',
+    id: "1",
+    name: "Epic Meme Vault Raid",
+    host: "CyberNinja42",
     players: 3,
     maxPlayers: 6,
     betAmount: 0.5,
-    difficulty: 'Hard',
-    status: 'waiting',
+    difficulty: "Hard",
+    status: "waiting",
   },
   {
-    id: '2',
-    name: 'Beginner Friendly Heist',
-    host: 'MemeQueen',
+    id: "2",
+    name: "Beginner Friendly Heist",
+    host: "MemeQueen",
     players: 2,
     maxPlayers: 4,
     betAmount: 0.1,
-    difficulty: 'Easy',
-    status: 'starting',
+    difficulty: "Easy",
+    status: "starting",
     timeLeft: 15,
   },
   {
-    id: '3',
-    name: 'High Stakes Vault Break',
-    host: 'DiamondHands',
+    id: "3",
+    name: "High Stakes Vault Break",
+    host: "DiamondHands",
     players: 5,
     maxPlayers: 6,
     betAmount: 2.0,
-    difficulty: 'Insane',
-    status: 'in-progress',
+    difficulty: "Insane",
+    status: "in-progress",
   },
   {
-    id: '4',
-    name: 'Weekend Warriors',
-    host: 'VibeCheck',
+    id: "4",
+    name: "Weekend Warriors",
+    host: "VibeCheck",
     players: 1,
     maxPlayers: 4,
     betAmount: 0.25,
-    difficulty: 'Medium',
-    status: 'waiting',
+    difficulty: "Medium",
+    status: "waiting",
   },
 ];
 
 const initialFilters: FilterOptions = {
-  search: '',
-  difficulty: 'all',
-  status: 'all',
+  search: "",
+  difficulty: "all",
+  status: "all",
   minBet: 0,
   maxBet: 0,
-  maxPlayers: 'all',
+  maxPlayers: "all",
 };
 
 export default function Lobbies() {
   const { connected } = useWallet();
   const { toast } = useToast();
   const [lobbies, setLobbies] = useState<LobbyData[]>(mockLobbies);
-  const [filteredLobbies, setFilteredLobbies] = useState<LobbyData[]>(mockLobbies);
+  const [filteredLobbies, setFilteredLobbies] =
+    useState<LobbyData[]>(mockLobbies);
   const [filters, setFilters] = useState<FilterOptions>(initialFilters);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Calculate active filters count
-  const activeFiltersCount = Object.entries(filters).reduce((count, [key, value]) => {
-    if (key === 'search' && value) return count + 1;
-    if (key === 'difficulty' && value !== 'all') return count + 1;
-    if (key === 'status' && value !== 'all') return count + 1;
-    if (key === 'maxPlayers' && value !== 'all') return count + 1;
-    if ((key === 'minBet' || key === 'maxBet') && value > 0) return count + 1;
-    return count;
-  }, 0);
+  const activeFiltersCount = Object.entries(filters).reduce(
+    (count, [key, value]) => {
+      if (key === "search" && value) return count + 1;
+      if (key === "difficulty" && value !== "all") return count + 1;
+      if (key === "status" && value !== "all") return count + 1;
+      if (key === "maxPlayers" && value !== "all") return count + 1;
+      if ((key === "minBet" || key === "maxBet") && value > 0) return count + 1;
+      return count;
+    },
+    0
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLobbies((prev) =>
+        prev.map((lobby) => {
+          if (
+            lobby.status === "starting" &&
+            lobby.timeLeft &&
+            lobby.timeLeft > 0
+          ) {
+            const updatedTime = lobby.timeLeft - 1;
+            return {
+              ...lobby,
+              timeLeft: updatedTime,
+              status: updatedTime <= 0 ? "in-progress" : lobby.status, // auto-start when timer hits 0
+            };
+          }
+          return lobby;
+        })
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Apply filters
   useEffect(() => {
     let filtered = [...lobbies];
 
     if (filters.search) {
-      filtered = filtered.filter(lobby => 
-        lobby.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        lobby.host.toLowerCase().includes(filters.search.toLowerCase())
+      filtered = filtered.filter(
+        (lobby) =>
+          lobby.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+          lobby.host.toLowerCase().includes(filters.search.toLowerCase())
       );
     }
 
-    if (filters.difficulty !== 'all') {
-      filtered = filtered.filter(lobby => lobby.difficulty === filters.difficulty);
+    if (filters.difficulty !== "all") {
+      filtered = filtered.filter(
+        (lobby) => lobby.difficulty === filters.difficulty
+      );
     }
 
-    if (filters.status !== 'all') {
-      filtered = filtered.filter(lobby => lobby.status === filters.status);
+    if (filters.status !== "all") {
+      filtered = filtered.filter((lobby) => lobby.status === filters.status);
     }
 
-    if (filters.maxPlayers !== 'all') {
-      filtered = filtered.filter(lobby => lobby.maxPlayers === parseInt(filters.maxPlayers));
+    if (filters.maxPlayers !== "all") {
+      filtered = filtered.filter(
+        (lobby) => lobby.maxPlayers === parseInt(filters.maxPlayers)
+      );
     }
 
     if (filters.minBet > 0) {
-      filtered = filtered.filter(lobby => lobby.betAmount >= filters.minBet);
+      filtered = filtered.filter((lobby) => lobby.betAmount >= filters.minBet);
     }
 
     if (filters.maxBet > 0) {
-      filtered = filtered.filter(lobby => lobby.betAmount <= filters.maxBet);
+      filtered = filtered.filter((lobby) => lobby.betAmount <= filters.maxBet);
     }
 
     setFilteredLobbies(filtered);
@@ -119,42 +152,42 @@ export default function Lobbies() {
   const handleJoinLobby = (lobbyId: string) => {
     if (!connected) {
       toast({
-        title: 'Wallet Not Connected',
-        description: 'Please connect your Phantom wallet to join a heist.',
-        variant: 'destructive',
+        title: "Wallet Not Connected",
+        description: "Please connect your Phantom wallet to join a heist.",
+        variant: "destructive",
       });
       return;
     }
 
     // Find the lobby and update player count
-    const lobbyToJoin = lobbies.find(lobby => lobby.id === lobbyId);
+    const lobbyToJoin = lobbies.find((lobby) => lobby.id === lobbyId);
     if (!lobbyToJoin) {
       toast({
-        title: 'Heist Not Found',
-        description: 'The heist you tried to join no longer exists.',
-        variant: 'destructive',
+        title: "Heist Not Found",
+        description: "The heist you tried to join no longer exists.",
+        variant: "destructive",
       });
       return;
     }
 
     if (lobbyToJoin.players >= lobbyToJoin.maxPlayers) {
       toast({
-        title: 'Heist Full',
-        description: 'This heist is already at maximum capacity.',
-        variant: 'destructive',
+        title: "Heist Full",
+        description: "This heist is already at maximum capacity.",
+        variant: "destructive",
       });
       return;
     }
 
     // Update the lobby with new player count
-    setLobbies(prev => prev.map(lobby => 
-      lobby.id === lobbyId 
-        ? { ...lobby, players: lobby.players + 1 }
-        : lobby
-    ));
+    setLobbies((prev) =>
+      prev.map((lobby) =>
+        lobby.id === lobbyId ? { ...lobby, players: lobby.players + 1 } : lobby
+      )
+    );
 
     toast({
-      title: 'Successfully Joined Heist!',
+      title: "Successfully Joined Heist!",
       description: `You've joined "${lobbyToJoin.name}". Bet placed: ${lobbyToJoin.betAmount} SOL`,
     });
   };
@@ -162,8 +195,8 @@ export default function Lobbies() {
   const handleViewLobby = (lobbyId: string) => {
     // TODO: Navigate to lobby view/spectate page
     toast({
-      title: 'Viewing Lobby',
-      description: 'Opening lobby details...',
+      title: "Viewing Lobby",
+      description: "Opening lobby details...",
     });
   };
 
@@ -175,9 +208,9 @@ export default function Lobbies() {
   }) => {
     if (!connected) {
       toast({
-        title: 'Wallet Not Connected',
-        description: 'Please connect your Phantom wallet to create a heist.',
-        variant: 'destructive',
+        title: "Wallet Not Connected",
+        description: "Please connect your Phantom wallet to create a heist.",
+        variant: "destructive",
       });
       return;
     }
@@ -185,53 +218,61 @@ export default function Lobbies() {
     try {
       // Generate a meme for the new heist
       toast({
-        title: 'Creating Heist...',
-        description: 'Generating epic meme for your heist!',
+        title: "Creating Heist...",
+        description: "Generating epic meme for your heist!",
       });
 
-      const { AIService } = await import('@/services/aiService');
+      const { AIService } = await import("@/services/aiService");
       const meme = await AIService.generateMeme({
         prompt: `${lobbyData.name}, ${lobbyData.difficulty} difficulty heist, ${lobbyData.maxPlayers} players, ${lobbyData.betAmount} SOL bet`,
         topic: `${lobbyData.difficulty} heist called ${lobbyData.name}`,
-        style: 'epic'
+        style: "epic",
       });
 
       const newLobby: LobbyData = {
         id: Date.now().toString(),
         name: lobbyData.name,
-        host: 'You', // Replace with actual username
+        host: "You", // Replace with actual username
         players: 1,
         maxPlayers: lobbyData.maxPlayers,
         betAmount: lobbyData.betAmount,
-        difficulty: lobbyData.difficulty as 'Easy' | 'Medium' | 'Hard' | 'Insane',
-        status: 'waiting',
+        difficulty: lobbyData.difficulty as
+          | "Easy"
+          | "Medium"
+          | "Hard"
+          | "Insane",
+        status: "waiting",
       };
 
-      setLobbies(prev => [newLobby, ...prev]);
-      
+      setLobbies((prev) => [newLobby, ...prev]);
+
       toast({
-        title: 'Heist Created!',
+        title: "Heist Created!",
         description: `"${lobbyData.name}" is ready for players to join. Epic meme generated!`,
       });
     } catch (error) {
-      console.error('Error creating heist:', error);
-      
+      console.error("Error creating heist:", error);
+
       // Still create the lobby even if meme generation fails
       const newLobby: LobbyData = {
         id: Date.now().toString(),
         name: lobbyData.name,
-        host: 'You',
+        host: "You",
         players: 1,
         maxPlayers: lobbyData.maxPlayers,
         betAmount: lobbyData.betAmount,
-        difficulty: lobbyData.difficulty as 'Easy' | 'Medium' | 'Hard' | 'Insane',
-        status: 'waiting',
+        difficulty: lobbyData.difficulty as
+          | "Easy"
+          | "Medium"
+          | "Hard"
+          | "Insane",
+        status: "waiting",
       };
 
-      setLobbies(prev => [newLobby, ...prev]);
-      
+      setLobbies((prev) => [newLobby, ...prev]);
+
       toast({
-        title: 'Heist Created!',
+        title: "Heist Created!",
         description: `"${lobbyData.name}" is ready for players to join.`,
       });
     }
@@ -243,8 +284,8 @@ export default function Lobbies() {
     setTimeout(() => {
       setIsRefreshing(false);
       toast({
-        title: 'Lobbies Refreshed',
-        description: 'Latest heist data loaded.',
+        title: "Lobbies Refreshed",
+        description: "Latest heist data loaded.",
       });
     }, 1000);
   };
@@ -266,7 +307,8 @@ export default function Lobbies() {
             Connect Your Wallet
           </h1>
           <p className="text-muted-foreground mb-8">
-            Connect your Phantom wallet to access game lobbies and start heisting!
+            Connect your Phantom wallet to access game lobbies and start
+            heisting!
           </p>
           <WalletMultiButton className="!bg-gradient-primary !text-white hover:!bg-gradient-primary hover:!opacity-90 !rounded-2xl !h-12 !px-8 !font-semibold" />
         </motion.div>
@@ -292,7 +334,7 @@ export default function Lobbies() {
               {filteredLobbies.length} lobbies available
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <Button
               variant="outline"
@@ -300,7 +342,13 @@ export default function Lobbies() {
               disabled={isRefreshing}
               className="group"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-300'}`} />
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${
+                  isRefreshing
+                    ? "animate-spin"
+                    : "group-hover:rotate-180 transition-transform duration-300"
+                }`}
+              />
               Refresh
             </Button>
             <Button
@@ -333,19 +381,23 @@ export default function Lobbies() {
                 className="text-center py-12"
               >
                 <Zap className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2 text-foreground">No Heists Found</h3>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">
+                  No Heists Found
+                </h3>
                 <p className="text-muted-foreground mb-6">
-                  {activeFiltersCount > 0 
-                    ? 'Try adjusting your filters to find more lobbies.'
-                    : 'Be the first to create a heist!'
-                  }
+                  {activeFiltersCount > 0
+                    ? "Try adjusting your filters to find more lobbies."
+                    : "Be the first to create a heist!"}
                 </p>
                 {activeFiltersCount > 0 ? (
                   <Button variant="outline" onClick={clearFilters}>
                     Clear Filters
                   </Button>
                 ) : (
-                  <Button variant="gaming" onClick={() => setShowCreateModal(true)}>
+                  <Button
+                    variant="gaming"
+                    onClick={() => setShowCreateModal(true)}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Create First Heist
                   </Button>
