@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { motion } from 'framer-motion';
-import { 
-  Trophy, 
-  Medal, 
-  Crown, 
-  Zap, 
-  Coins, 
-  Target, 
+import React, { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
+import {
+  Trophy,
+  Medal,
+  Crown,
+  Zap,
+  Coins,
+  Target,
   Calendar,
   TrendingUp,
   Users,
-  Star
-} from 'lucide-react';
+  Star,
+} from "lucide-react";
 
 // Mock leaderboard data
 const mockLeaderboard = [
   {
     rank: 1,
-    username: 'MemeKing42',
-    avatar: '/placeholder.svg',
+    username: "MemeKing42",
+    avatar: "/memeKing.png",
     totalWins: 156,
     winRate: 87.2,
     totalEarned: 234.56,
@@ -33,8 +33,8 @@ const mockLeaderboard = [
   },
   {
     rank: 2,
-    username: 'CryptoNinja',
-    avatar: '/placeholder.svg',
+    username: "CryptoNinja",
+    avatar: "/crypto-ninja.png",
     totalWins: 143,
     winRate: 82.1,
     totalEarned: 198.32,
@@ -44,8 +44,8 @@ const mockLeaderboard = [
   },
   {
     rank: 3,
-    username: 'VibeQueen',
-    avatar: '/placeholder.svg',
+    username: "VibeQueen",
+    avatar: "/vibe-queen.png",
     totalWins: 128,
     winRate: 79.5,
     totalEarned: 187.45,
@@ -55,8 +55,8 @@ const mockLeaderboard = [
   },
   {
     rank: 4,
-    username: 'DiamondHeister',
-    avatar: '/placeholder.svg',
+    username: "DiamondHeister",
+    avatar: "/diamond-heister.png",
     totalWins: 112,
     winRate: 76.8,
     totalEarned: 156.78,
@@ -66,8 +66,8 @@ const mockLeaderboard = [
   },
   {
     rank: 5,
-    username: 'MemeLord',
-    avatar: '/placeholder.svg',
+    username: "MemeLord",
+    avatar: "/meme-lord.png",
     totalWins: 98,
     winRate: 74.2,
     totalEarned: 143.22,
@@ -94,27 +94,33 @@ const getRankIcon = (rank: number) => {
     case 3:
       return <Medal className="w-6 h-6 text-orange-600" />;
     default:
-      return <span className="w-6 h-6 flex items-center justify-center text-sm font-bold text-muted-foreground">#{rank}</span>;
+      return (
+        <span className="w-6 h-6 flex items-center justify-center text-sm font-bold text-muted-foreground">
+          #{rank}
+        </span>
+      );
   }
 };
 
 const getRankColor = (rank: number) => {
   switch (rank) {
     case 1:
-      return 'from-yellow-500/20 to-yellow-600/5 border-yellow-500/30';
+      return "from-yellow-500/20 to-yellow-600/5 border-yellow-500/30";
     case 2:
-      return 'from-gray-400/20 to-gray-500/5 border-gray-400/30';
+      return "from-gray-400/20 to-gray-500/5 border-gray-400/30";
     case 3:
-      return 'from-orange-500/20 to-orange-600/5 border-orange-500/30';
+      return "from-orange-500/20 to-orange-600/5 border-orange-500/30";
     default:
-      return 'from-primary/10 to-primary/5 border-primary/20';
+      return "from-primary/10 to-primary/5 border-primary/20";
   }
 };
 
 export default function Leaderboard() {
-  const [selectedTab, setSelectedTab] = useState('all-time');
-  const [selectedCategory, setSelectedCategory] = useState('wins');
-  const [generatedAvatars, setGeneratedAvatars] = useState<Record<string, string>>({});
+  const [selectedTab, setSelectedTab] = useState("all-time");
+  const [selectedCategory, setSelectedCategory] = useState("wins");
+  const [generatedAvatars, setGeneratedAvatars] = useState<
+    Record<string, string>
+  >({});
   const [loadingAvatars, setLoadingAvatars] = useState(false);
 
   // Generate profile images for top players
@@ -125,30 +131,36 @@ export default function Leaderboard() {
   const generateProfileImages = async () => {
     setLoadingAvatars(true);
     try {
-      const { AIService } = await import('@/services/aiService');
+      const { AIService } = await import("@/services/aiService");
       const topPlayers = mockLeaderboard.slice(0, 5); // Generate for top 5
-      
+
       const avatarPromises = topPlayers.map(async (player) => {
         try {
-          const profileImage = await AIService.generateProfileImage(player.username, player.rank);
+          const profileImage = await AIService.generateProfileImage(
+            player.username,
+            player.rank
+          );
           return { username: player.username, image: profileImage.image };
         } catch (error) {
-          console.error(`Failed to generate avatar for ${player.username}:`, error);
+          console.error(
+            `Failed to generate avatar for ${player.username}:`,
+            error
+          );
           return { username: player.username, image: null };
         }
       });
 
       const results = await Promise.all(avatarPromises);
       const avatarMap: Record<string, string> = {};
-      results.forEach(result => {
+      results.forEach((result) => {
         if (result.image) {
           avatarMap[result.username] = result.image;
         }
       });
-      
+
       setGeneratedAvatars(avatarMap);
     } catch (error) {
-      console.error('Error generating profile images:', error);
+      console.error("Error generating profile images:", error);
     } finally {
       setLoadingAvatars(false);
     }
@@ -156,13 +168,13 @@ export default function Leaderboard() {
 
   const sortedPlayers = [...mockLeaderboard].sort((a, b) => {
     switch (selectedCategory) {
-      case 'wins':
+      case "wins":
         return b.totalWins - a.totalWins;
-      case 'winrate':
+      case "winrate":
         return b.winRate - a.winRate;
-      case 'earnings':
+      case "earnings":
         return b.totalEarned - a.totalEarned;
-      case 'streak':
+      case "streak":
         return b.streak - a.streak;
       default:
         return a.rank - b.rank;
@@ -206,23 +218,33 @@ export default function Leaderboard() {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{mockWeeklyStats.totalGames.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-primary">
+                  {mockWeeklyStats.totalGames.toLocaleString()}
+                </div>
                 <div className="text-sm text-muted-foreground">Total Games</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-secondary">{mockWeeklyStats.totalPlayers.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-secondary">
+                  {mockWeeklyStats.totalPlayers.toLocaleString()}
+                </div>
                 <div className="text-sm text-muted-foreground">Players</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-success">{mockWeeklyStats.totalWagered.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-success">
+                  {mockWeeklyStats.totalWagered.toLocaleString()}
+                </div>
                 <div className="text-sm text-muted-foreground">SOL Wagered</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-warning">{mockWeeklyStats.biggestWin}</div>
+                <div className="text-2xl font-bold text-warning">
+                  {mockWeeklyStats.biggestWin}
+                </div>
                 <div className="text-sm text-muted-foreground">Biggest Win</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{mockWeeklyStats.topStreak}</div>
+                <div className="text-2xl font-bold text-primary">
+                  {mockWeeklyStats.topStreak}
+                </div>
                 <div className="text-sm text-muted-foreground">Top Streak</div>
               </div>
             </div>
@@ -230,7 +252,11 @@ export default function Leaderboard() {
         </motion.div>
 
         {/* Leaderboard Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+        <Tabs
+          value={selectedTab}
+          onValueChange={setSelectedTab}
+          className="space-y-6"
+        >
           <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
             <TabsList className="grid grid-cols-3 bg-surface">
               <TabsTrigger value="all-time">All Time</TabsTrigger>
@@ -241,33 +267,33 @@ export default function Leaderboard() {
             {/* Category Filters */}
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={selectedCategory === 'wins' ? 'gaming' : 'outline'}
+                variant={selectedCategory === "wins" ? "gaming" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory('wins')}
+                onClick={() => setSelectedCategory("wins")}
               >
                 <Target className="w-4 h-4 mr-2" />
                 Wins
               </Button>
               <Button
-                variant={selectedCategory === 'winrate' ? 'gaming' : 'outline'}
+                variant={selectedCategory === "winrate" ? "gaming" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory('winrate')}
+                onClick={() => setSelectedCategory("winrate")}
               >
                 <Star className="w-4 h-4 mr-2" />
                 Win Rate
               </Button>
               <Button
-                variant={selectedCategory === 'earnings' ? 'gaming' : 'outline'}
+                variant={selectedCategory === "earnings" ? "gaming" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory('earnings')}
+                onClick={() => setSelectedCategory("earnings")}
               >
                 <Coins className="w-4 h-4 mr-2" />
                 Earnings
               </Button>
               <Button
-                variant={selectedCategory === 'streak' ? 'gaming' : 'outline'}
+                variant={selectedCategory === "streak" ? "gaming" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory('streak')}
+                onClick={() => setSelectedCategory("streak")}
               >
                 <Zap className="w-4 h-4 mr-2" />
                 Streak
@@ -290,9 +316,19 @@ export default function Leaderboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`relative ${actualRank === 1 ? 'md:order-2' : actualRank === 2 ? 'md:order-1' : 'md:order-3'}`}
+                    className={`relative ${
+                      actualRank === 1
+                        ? "md:order-2"
+                        : actualRank === 2
+                        ? "md:order-1"
+                        : "md:order-3"
+                    }`}
                   >
-                    <Card className={`p-6 text-center bg-gradient-to-br ${getRankColor(actualRank)} border shadow-gaming`}>
+                    <Card
+                      className={`p-6 text-center bg-gradient-to-br ${getRankColor(
+                        actualRank
+                      )} border shadow-gaming`}
+                    >
                       {/* Rank Badge */}
                       <div className="flex justify-center mb-4">
                         {getRankIcon(actualRank)}
@@ -300,7 +336,11 @@ export default function Leaderboard() {
 
                       {/* Avatar */}
                       <Avatar className="w-16 h-16 mx-auto mb-4 border-4 border-primary/20">
-                        <AvatarImage src={generatedAvatars[player.username] || player.avatar} />
+                        <AvatarImage
+                          src={
+                            generatedAvatars[player.username] || player.avatar
+                          }
+                        />
                         <AvatarFallback className="bg-gradient-primary text-white font-bold">
                           {loadingAvatars ? (
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
@@ -322,15 +362,23 @@ export default function Leaderboard() {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Wins:</span>
-                          <span className="font-semibold">{player.totalWins}</span>
+                          <span className="font-semibold">
+                            {player.totalWins}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Win Rate:</span>
-                          <span className="font-semibold text-success">{player.winRate.toFixed(1)}%</span>
+                          <span className="text-muted-foreground">
+                            Win Rate:
+                          </span>
+                          <span className="font-semibold text-success">
+                            {player.winRate.toFixed(1)}%
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Earned:</span>
-                          <span className="font-semibold text-secondary">{player.totalEarned.toFixed(2)} SOL</span>
+                          <span className="font-semibold text-secondary">
+                            {player.totalEarned.toFixed(2)} SOL
+                          </span>
                         </div>
                       </div>
                     </Card>
@@ -346,7 +394,7 @@ export default function Leaderboard() {
                   <Users className="w-5 h-5 mr-2 text-primary" />
                   Full Rankings
                 </h2>
-                
+
                 <div className="space-y-3">
                   {sortedPlayers.map((player, index) => (
                     <motion.div
@@ -364,7 +412,11 @@ export default function Leaderboard() {
 
                         {/* Avatar & Name */}
                         <Avatar className="w-10 h-10 border-2 border-primary/20">
-                          <AvatarImage src={generatedAvatars[player.username] || player.avatar} />
+                          <AvatarImage
+                            src={
+                              generatedAvatars[player.username] || player.avatar
+                            }
+                          />
                           <AvatarFallback className="bg-gradient-primary text-white text-sm font-bold">
                             {loadingAvatars ? (
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -373,29 +425,41 @@ export default function Leaderboard() {
                             )}
                           </AvatarFallback>
                         </Avatar>
-                        
+
                         <div>
-                          <div className="font-semibold text-foreground">{player.username}</div>
-                          <div className="text-sm text-muted-foreground">Level {player.level}</div>
+                          <div className="font-semibold text-foreground">
+                            {player.username}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Level {player.level}
+                          </div>
                         </div>
                       </div>
 
                       {/* Stats */}
                       <div className="flex items-center gap-6 text-sm">
                         <div className="text-center">
-                          <div className="font-semibold text-foreground">{player.totalWins}</div>
+                          <div className="font-semibold text-foreground">
+                            {player.totalWins}
+                          </div>
                           <div className="text-muted-foreground">Wins</div>
                         </div>
                         <div className="text-center">
-                          <div className="font-semibold text-success">{player.winRate.toFixed(1)}%</div>
+                          <div className="font-semibold text-success">
+                            {player.winRate.toFixed(1)}%
+                          </div>
                           <div className="text-muted-foreground">Rate</div>
                         </div>
                         <div className="text-center">
-                          <div className="font-semibold text-secondary">{player.totalEarned.toFixed(2)}</div>
+                          <div className="font-semibold text-secondary">
+                            {player.totalEarned.toFixed(2)}
+                          </div>
                           <div className="text-muted-foreground">SOL</div>
                         </div>
                         <div className="text-center">
-                          <div className="font-semibold text-warning">{player.streak}</div>
+                          <div className="font-semibold text-warning">
+                            {player.streak}
+                          </div>
                           <div className="text-muted-foreground">Streak</div>
                         </div>
                       </div>
