@@ -1,3 +1,4 @@
+```markdown
 # 🎵 VibeHeist
 
 VibeHeist is an AI-powered platform for discovering, analyzing, and managing music and audio content. It combines multiple APIs and AI models to deliver an interactive, intelligent experience for music lovers, creators, and analysts.
@@ -41,7 +42,7 @@ VibeHeist is designed to **analyze music trends**, **generate AI-powered audio i
 ---
 
 ## 🏗 Architecture
-
+```
 
 Frontend (React/Vue/Svelte or Lovable/Bolt builder)
 ↓
@@ -51,6 +52,7 @@ API Gateway/Integrations Layer
 ↓
 Databases & External Services
 
+````
 
 ### Data Flow:
 1. **User Interaction:** User searches, uploads audio, or requests recommendations via the front end.  
@@ -84,17 +86,18 @@ Databases & External Services
 | PayPal          | Alternative payment gateway                 | https://developer.paypal.com/docs/checkout/  |
 | Twilio          | Notifications (SMS/WhatsApp)                | https://www.twilio.com/docs                  |
 
-
+---
 
 ## ⚙ Installation
 1. Clone the repository:  
-   ```bash```
+   ```bash
    git clone https://github.com/yourusername/vibeheist.git
    cd vibeheist
+````
 
 2. Install dependencies:
 
-   ```bash```
+   ```bash
    npm install
    # or
    pip install -r requirements.txt
@@ -113,6 +116,7 @@ Databases & External Services
    TWILIO_AUTH_TOKEN=your_key
    ```
 
+---
 
 ## 🔑 Configuration
 
@@ -149,7 +153,7 @@ Databases & External Services
 
 ## 🗂 File Structure
 
-
+```
 vibeheist/
 │
 ├── src/
@@ -167,7 +171,7 @@ vibeheist/
 ├── public/               # Static assets
 ├── README.md
 └── .env.example
-
+```
 
 ---
 
@@ -221,7 +225,7 @@ This project is licensed under the [MIT License](LICENSE).
 **Email:** [fashjohn04@gmail.com](mailto:fashjohn04@gmail.com)
 **Location:** Nigeria
 
-
+```
 
 You can copy and paste this directly into your `README.md` file on GitHub.
-
+```
