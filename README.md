@@ -92,7 +92,7 @@ Databases & External Services
    ```bash
    git clone https://github.com/yourusername/vibeheist.git
    cd vibeheist
-````
+
 
 2. Install dependencies:
 
@@ -224,7 +224,5 @@ This project is licensed under the [MIT License](LICENSE).
 **Email:** [fashjohn04@gmail.com](mailto:fashjohn04@gmail.com)
 **Location:** Nigeria
 
-```
 
 You can copy and paste this directly into your `README.md` file on GitHub.
-```
