@@ -125,6 +125,8 @@ export default function Profile() {
   const { connected, publicKey } = useWallet();
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [loadingProfileImage, setLoadingProfileImage] = useState(false);
   const navigate = useNavigate();
 
   const copyAddress = () => {
@@ -136,6 +138,51 @@ export default function Profile() {
       });
     }
   };
+
+  const generateProfileImage = async () => {
+    if (loadingProfileImage) return;
+    
+    setLoadingProfileImage(true);
+    try {
+      const prompt = `Gaming profile avatar for ${mockUserStats.username}, ${mockUserStats.rank}, cyberpunk style, neon colors, futuristic tech, digital art, professional gaming portrait, clean background, high quality`;
+      
+      const response = await fetch('https://gvrabsrytextpwaxxwnf.supabase.co/functions/v1/generate-meme-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate profile image');
+      }
+
+      const data = await response.json();
+      setProfileImage(data.image);
+      
+      toast({
+        title: "Profile Image Generated!",
+        description: "Your new AI-generated profile image is ready.",
+      });
+    } catch (error) {
+      console.error('Error generating profile image:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate profile image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingProfileImage(false);
+    }
+  };
+
+  // Generate profile image on component mount
+  React.useEffect(() => {
+    if (connected && !profileImage) {
+      generateProfileImage();
+    }
+  }, [connected, profileImage]);
 
   if (!connected) {
     return (
@@ -171,12 +218,34 @@ export default function Profile() {
             <div className="flex flex-col md:flex-row items-center gap-6">
               {/* Avatar and Basic Info */}
               <div className="flex flex-col md:flex-row items-center gap-4">
-                <Avatar className="w-24 h-24 border-4 border-primary/20">
-                  <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-gradient-primary text-white text-2xl font-bold">
-                    VH
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="w-24 h-24 border-4 border-primary/20">
+                    {profileImage ? (
+                      <AvatarImage src={profileImage} />
+                    ) : loadingProfileImage ? (
+                      <div className="w-full h-full flex items-center justify-center bg-muted">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      </div>
+                    ) : (
+                      <AvatarFallback className="bg-gradient-primary text-white text-2xl font-bold">
+                        VH
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={generateProfileImage}
+                    disabled={loadingProfileImage}
+                    className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
+                  >
+                    {loadingProfileImage ? (
+                      <div className="animate-spin rounded-full h-3 w-3 border border-primary border-t-transparent"></div>
+                    ) : (
+                      <Zap className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
 
                 <div className="text-center md:text-left">
                   <div className="flex items-center gap-2 mb-2">

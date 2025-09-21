@@ -122,17 +122,32 @@ export default function NFTGallery() {
   const generateMemesForNFTs = async () => {
     setLoadingMemes(true);
     try {
-      const { AIService } = await import('@/services/aiService');
       const memePromises = mockNFTs.map(async (nft) => {
         try {
-          const meme = await AIService.generateNFTMeme({
-            name: nft.name,
-            rarity: nft.rarity,
-            attributes: nft.attributes
+          // Create detailed prompt based on NFT attributes
+          const bossDefeated = nft.attributes.find(attr => attr.trait === 'Boss Defeated')?.value || 'unknown boss';
+          const heistType = nft.attributes.find(attr => attr.trait === 'Heist Type')?.value || 'epic heist';
+          const memeQuality = nft.attributes.find(attr => attr.trait === 'Meme Quality')?.value || 'solid';
+          
+          const prompt = `${nft.name}, ${nft.rarity} rarity NFT card, ${bossDefeated} boss defeated in ${heistType}, ${memeQuality} quality artwork, digital collectible gaming NFT, vibrant colors, epic gaming style, detailed illustration, high quality`;
+
+          // Call Stability AI directly
+          const response = await fetch('https://gvrabsrytextpwaxxwnf.supabase.co/functions/v1/generate-meme-image', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt })
           });
-          return { id: nft.id, image: meme.image };
+
+          if (!response.ok) {
+            throw new Error('Failed to generate image');
+          }
+
+          const data = await response.json();
+          return { id: nft.id, image: data.image };
         } catch (error) {
-          console.error(`Failed to generate meme for NFT ${nft.id}:`, error);
+          console.error(`Failed to generate image for NFT ${nft.id}:`, error);
           return { id: nft.id, image: null };
         }
       });
@@ -147,7 +162,7 @@ export default function NFTGallery() {
       
       setGeneratedMemes(memeMap);
     } catch (error) {
-      console.error('Error generating NFT memes:', error);
+      console.error('Error generating NFT images:', error);
     } finally {
       setLoadingMemes(false);
     }

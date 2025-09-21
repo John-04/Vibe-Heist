@@ -8,6 +8,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Plus, Zap, Users, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { GameDetailsModal } from "@/components/game/GameDetailsModal";
 
 // Mock data - replace with actual API calls
 const mockLobbies: LobbyData[] = [
@@ -72,6 +73,7 @@ export default function Lobbies() {
   const [filters, setFilters] = useState<FilterOptions>(initialFilters);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedLobby, setSelectedLobby] = useState<LobbyData | null>(null);
 
   // Calculate active filters count
   const activeFiltersCount = Object.entries(filters).reduce(
@@ -193,11 +195,10 @@ export default function Lobbies() {
   };
 
   const handleViewLobby = (lobbyId: string) => {
-    // TODO: Navigate to lobby view/spectate page
-    toast({
-      title: "Viewing Lobby",
-      description: "Opening lobby details...",
-    });
+    const lobby = lobbies.find(l => l.id === lobbyId);
+    if (lobby) {
+      setSelectedLobby(lobby);
+    }
   };
 
   const handleCreateLobby = async (lobbyData: {
@@ -429,6 +430,14 @@ export default function Lobbies() {
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
         onCreateLobby={handleCreateLobby}
+      />
+
+      {/* Game Details Modal */}
+      <GameDetailsModal
+        lobby={selectedLobby}
+        open={!!selectedLobby}
+        onOpenChange={(open) => !open && setSelectedLobby(null)}
+        onJoin={handleJoinLobby}
       />
     </div>
   );
