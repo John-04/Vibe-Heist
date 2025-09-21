@@ -1,4 +1,3 @@
-```markdown
 # 🎵 VibeHeist
 
 VibeHeist is an AI-powered platform for discovering, analyzing, and managing music and audio content. It combines multiple APIs and AI models to deliver an interactive, intelligent experience for music lovers, creators, and analysts.
