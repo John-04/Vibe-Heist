@@ -185,8 +185,3 @@ MIT License
 **Author:** Fashola John
 **Email:** [fashjohn04@gmail.com](mailto:fashjohn04@gmail.com)
 **Location:** Nigeria
-
-```
-
-This version removes the music-related content and fully reflects **VibeHeist** as a Web3 raid game.
-```
